@@ -34,17 +34,13 @@
           </div>
           <!-- 変更の時の登録ボタン -->
           <div class="register__submit">
-            <button
-            class="register__submit__btn"
-            type="submit"
-            name="button"
-            >
+            <button class="register__submit__btn" type="submit" name="button">
               <template v-if="targetTodo.id">
                 <span>変更する</span>
               </template>
               <template v-else>
-  <span>登録する</span>
-</template>
+                <span>登録する</span>
+              </template>
             </button>
           </div>
         </form>
@@ -111,12 +107,11 @@
       <p>全項目数: {{ todos.length }}</p>
       <p>完了済: {{ todos.filter(todo => todo.completed).length }}</p>
       <p>未完了: {{ todos.filter(todo => !todo.completed).length }}</p>
-      <!-- items.filter( function( value, index, array ) {})　todo.completedがtrueのものだけ -->
-      <!-- 「value」は、配列の値 「index」は、配列のインデックス番号 「array」は、現在処理している配列 -->
     </footer>
     </div>
   </div>
 </template>
+
 <script>
 import axios from "axios";
 import { log } from "util";
@@ -125,8 +120,6 @@ export default {
   data() {
     return {
       todos: [],
-      // ↑ここの中にデータが格納されていく。
-
       targetTodo: {
         id: null,
         title: "",
@@ -136,13 +129,11 @@ export default {
       errorMessage: ""
     };
   },
-  // インスタンスが生成された後に実行される
   created() {
     axios
       .get("http://localhost:3000/api/todos/")
       .then(({ data }) => {
         this.todos = data.todos.reverse();
-        // reverseしないと古いものが上に来る
       })
       .catch(err => {
         this.showError(err);
@@ -195,9 +186,8 @@ export default {
       this.targetTodo = Object.assign({}, todo); //showTodoはtemplate内で指定してあげた選択todoが入ってるよ
     },
     editTodo() {
-      const targetTodo = this.todos.find(
-        todo => todo.id === this.targetTodo.id
-      ); //選択したデータのI'dとデータないのI'dが同じものを引っ張って来て定義する。
+      const targetTodo = this.todos
+      .find(todo => todo.id === this.targetTodo.id); //選択したデータのI'dとデータないのI'dが同じものを引っ張って来ます
       if (
         targetTodo.title === this.targetTodo.title &&
         targetTodo.detail === this.targetTodo.detail //タイトルと内容両方に変更がない場合
@@ -214,10 +204,10 @@ export default {
         .then(({ data }) => {
           this.todos = this.todos.map(todo => {
             //map 与えられた関数を配列のすべての要素に対して呼び出し、その結果からなる新しい配列を生成します。
-            if (todo.id === this.targetTodo.id) return data; //もしtodo.id=taget idだったら　dataを返しますよ
-            return todo; //returnは１度通るとその後通らないのでここはelseの処理
+            if (todo.id === this.targetTodo.id) return data;  //もしtodo.id=taget idだったら　dataを返しますよ
+            return todo;  //returnは１度通るとその後通らないのでここはelseの処理
           });
-          this.targetTodo = this.initTargetTodo(); //初期化
+          this.targetTodo = this.initTargetTodo();
           this.hideError();
         })
         .catch(err => {
@@ -250,15 +240,12 @@ export default {
         .post("http://localhost:3000/api/todos/", postTodo)
         .then(({ data }) => {
           this.todos.unshift(data);  // unshift() メソッドは、配列の最初に 1 つ以上の要素を追加し、新しい配列の長さを返します。
-          this.targetTodo = Object.assign({}, this.targetTodo, {
-            title: "",
-            detail: ""
-          });
+          this.targetTodo = this.initTargetTodo();
           this.hideError();
         })
         .catch(err => {
           this.showError(err);
-        });
+        });　
     }
   }
 };
