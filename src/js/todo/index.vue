@@ -1,3 +1,4 @@
+
 <template lang="html">
   <div class="todo__wrapper">
     <div class="todo__inner">
@@ -6,77 +7,255 @@
       </header>
 
       <main class="main">
-        <form class="register">
+<!-- 登録ボタン -->
+        <form
+        class="register"
+        v-on:submit.prevent="targetTodo.id ? editTodo() : addTodo()"
+        >
+          <!-- submit prevent で画面が更新されてしまうのを防ぎつつ、edtiTodoかaddTodoが実行される。 -->
           <div class="register__input">
             <p class="register__input__title">やることのタイトル</p>
+            <!--  v-bind:value="targetTodo.title"
+                  v-on:input="targetTodo.title = $event.target.value"
+                  「<input> や <textarea>要素の値が変更された時」 に発生します。-->
             <input
+              v-model="targetTodo.title"
               type="text"
               name="title"
               placeholder="ここにTODOのタイトルを記入してください"
+              required
             >
           </div>
           <div class="register__input">
             <p class="register__input__title">やることの内容</p>
             <textarea
+              v-model="targetTodo.detail"
               name="detail"
               rows="3"
               placeholder="ここにTODOの内容を記入してください。改行は半角スペースに変換されます。"
+              required
             />
           </div>
+<!-- 変更の時の登録ボタン -->
           <div class="register__submit">
             <button class="register__submit__btn" type="submit" name="button">
-              登録する
+              <template v-if="targetTodo.id">
+                <span>変更する</span>
+              </template>
+              <template v-else>
+                <span>登録する</span>
+              </template>
             </button>
           </div>
         </form>
 
+      <div v-if="errorMessage" class="error">
+        <p class="error__text">{{ errorMessage }}</p>
+      </div>
+<!-- todoの一覧-->
         <div class="todos">
-          <ul class="todos__list">
-            <li>
-              <div class="todos__inner">
-                <div class="todos__completed">
-                  <button class="todos__completed__btn" type="button">未完了</button>
+          <template v-if="todos.length">
+            <!-- 0がfalseでそれ以外の数値ならtrue -->
+            <ul class="todos__list">
+              <li
+              v-for="todo in todos"
+              v-bind:key="todo.id"
+              v-bind:class="todo.completed ? 'is-completed' : ''"
+              >
+              <!-- if todo.completed is true, add class of is-completed, if not, add empty '' to the class -->
+<!-- 未完了ボタンの処理 -->
+                <div class="todos__inner">
+                  <div class="todos__completed">
+                    <button
+                    class="todos__completed__btn"
+                    type="button"
+                    @click="changeCompleted(todo)"
+                    >
+                    <template v-if="todo.completed">
+                        <span>完了</span>
+                      </template>
+                      <template v-else>
+                        <span>未完了</span>
+                        </template>
+                    </button>
+<!-- ここまで未完了ボタン -->
+                  </div>
+                  <div class="todos__desc">
+                    <h2 class="todos__desc__title">{{ todo.title }}</h2>
+                    <p class="todos__desc__detail">{{todo.detail}}</p>
+                  </div>
+<!-- 編集ボタン　引数todoにクリックしたtodoが -->
+                  <div class="todos__btn">
+                    <button
+                      class="todos__btn__edit"
+                      type="button"
+                      @click="showEditor(todo)"
+                    >編集</button>
+<!-- 削除ボタン -->
+                    <button
+                    class="todos__btn__delete"
+                    type="button"
+                    v-on:click="deleteTodo(todo.id)"
+                    >削除</button>
+                  </div>
                 </div>
-                <div class="todos__desc">
-                  <h2 class="todos__desc__title">ここにはTodoのタイトルが入ります</h2>
-                  <p class="todos__desc__detail">ここにはTodoの内容が入ります</p>
-                </div>
-                <div class="todos__btn">
-                  <button class="todos__btn__edit" type="button">編集</button>
-                  <button class="todos__btn__delete" type="button">削除</button>
-                </div>
-              </div>
-            </li>
-          </ul>
+              </li>
+            </ul>
+          </template>
+          <template v-else>
+            <p class="todos__empty">やることリストには何も登録されていません。</p>
+          </template>
         </div>
       </main>
-
-      <footer class="footer">
-        <p>全項目数: 0</p>
-        <p>完了済: 0</p>
-        <p>未完了: 0</p>
-      </footer>
+    <footer class="footer">
+      <p>全項目数: {{ todos.length }}</p>
+      <p>完了済: {{ todos.filter(todo => todo.completed).length }}</p>
+      <p>未完了: {{ todos.filter(todo => !todo.completed).length }}</p>
+      <!-- items.filter( function( value, index, array ) {})　todo.completedがtrueのものだけ -->
+      <!-- 「value」は、配列の値 「index」は、配列のインデックス番号 「array」は、現在処理している配列 -->
+    </footer>
     </div>
   </div>
 </template>
-
 <script>
+import axios from "axios";
+import { log } from 'util';
+
 export default {
   data() {
     return {
-      todos: [
-        // {
-        //   id: 1,
-        //   title: 'タイトル 01',
-        //   detail: '詳細 01',
-        //   completed: false,
-        // },
-      ],
+      todos: [],
+    // ↑ここの中にデータが格納されていく。
+
+      targetTodo: {
+        id: null,
+        title: "",
+        detail: "",
+        completed: false
+      },
+      errorMessage: ""
     };
   },
+// インスタンスが生成された後に実行される
+  created() {
+    axios
+      .get("http://localhost:3000/api/todos/")
+      .then(({ data }) => {
+        this.todos = data.todos.reverse();
+        // reverseしないと古いものが上に来る
+      })
+      .catch((err) => {
+        this.showError(err);
+      });
+    },
+
+//ーーーーーーーーーーーーmethodーーーーーーーーーーーーーー
+  methods: {　
+      initTargetTodo() {
+    return {
+      id: null,
+      title: '',
+      detail: '',
+      completed: false,
+    };
+  },
+    hideError(){
+    this.errorMessage = '';
+  },
+  showError(err) {
+    if (err.response) {
+      this.errorMessage = err.response.data.message;
+      
+    } else {
+      this.errorMessage = 'ネットに接続がされていない、もしくはサーバーとの接続がされていません。ご確認ください。';
+    }
+  },
+//未完了をクリックしたときの処理
+    changeCompleted(todo) {
+      this.targetTodo = this.initTargetTodo(); //ここでthis.targetTodoを初期化している。
+      const targetTodo = Object.assign({}, todo);
+      axios.patch(`http://localhost:3000/api/todos/${targetTodo.id}`, {
+        //PATCH: リソースの部分置換
+        completed: !targetTodo.completed,
+      }).then(({ data }) => {
+        this.todos = this.todos.map((todoItem) => {
+          if (todoItem.id === targetTodo.id) return data;
+          return todoItem;
+          this.hideError();
+        });
+      }).catch((err) => {
+        // .catch(function (error) { と同じ意味
+        this.showError(err);
+        
+      });
+    },
+
+// 変更のメソッド
+  showEditor(todo) {
+    this.targetTodo = Object.assign({}, todo); //showTodoはtemplate内で指定してあげた選択todoが入ってるよ
+  },
+  editTodo() {
+    const targetTodo = this.todos.find(todo => todo.id === this.targetTodo.id);//選択したデータのI'dとデータないのI'dが同じものを引っ張って来て定義する。
+    if (
+      targetTodo.title === this.targetTodo.title && targetTodo.detail === this.targetTodo.detail　//タイトルと内容両方に変更がない場合
+    ) {
+      this.targetTodo = this.initTargetTodo(); //空のやつをtargetTodoに代入してるよ。
+      return;　//変更する必要がないので、フォーム内を初期化して処理を止める。
+    }
+    axios.patch(`http://localhost:3000/api/todos/${this.targetTodo.id}`, {
+        //PATCH: リソースの部分置換
+      title: this.targetTodo.title,
+      detail: this.targetTodo.detail,　//変更後のタイトルとdetail
+    }).then(({ data }) => {
+      this.todos = this.todos.map((todo) => {   //map 与えられた関数を配列のすべての要素に対して呼び出し、その結果からなる新しい配列を生成します。
+        if (todo.id === this.targetTodo.id) return data;　//もしtodo.id=taget idだったら　dataを返しますよ
+        return todo;  //returnは１度通るとその後通らないのでここはelseの処理
+      });
+      this.targetTodo = this.initTargetTodo();　//初期化
+      this.hideError();
+    }).catch((err) => {
+        this.showError(err);
+    });
+  },
+// 削除のメソッド
+　   deleteTodo(id) {
+    this.targetTodo = this.initTargetTodo();
+    //console.log(id);　//ここで引数にIdを渡してindex番号を確認
+      axios.delete(`http://localhost:3000/api/todos/${id}`)
+      .then(({ data }) => {
+    this.todos = data.todos.reverse();
+        this.hideError();
+  }).catch((err) => {
+  this.showError(err);
+  });
+  },
+//Todoを追加する処理
+    addTodo() {
+      const postTodo = Object.assign(
+        {},
+        {
+          title: this.targetTodo.title,
+          detail: this.targetTodo.detail
+        });
+        // {title: "タイトルの中身", detail: "やることの中身"}っていうオブジェクトがpostTodoに追加される
+
+      axios
+        .post("http://localhost:3000/api/todos/", postTodo)　//引数で送るデータの指定をしている。　今回は上で定義したpostTodo
+        // 上でデータを追加してあげて、成功したら下の処理をする。
+        .then(({ data }) => { //リクエストの返答が引数に入っている
+          this.todos.unshift(data);  // unshift() メソッドは、配列の最初に 1 つ以上の要素を追加し、新しい配列の長さを返します。
+          this.targetTodo = Object.assign({}, this.targetTodo, {title: "",detail: ""}); //text formの中身を空にする
+          this.errorMessage="";　//エラーメッセージを空にする
+        }).catch(err => {　// エラー時の処理
+        this.showError(err);
+        });
+    },
+  }
 };
 </script>
 
+
+<!-- ~~~~~~~~~~~~style~~~~~~~~~~~~ !-->
 <style lang="scss" scoped>
 .todo {
   &__wrapper {
@@ -129,7 +308,8 @@ export default {
       font-weight: bold;
       font-size: 14px;
     }
-    input, textarea {
+    input,
+    textarea {
       padding: 10px;
       width: 100%;
       font-size: 14px;
@@ -172,7 +352,7 @@ export default {
     & > li {
       padding: 15px 10px;
       border-top: 1px solid #ddd;
-      transition: all .3s;
+      transition: all 0.3s;
       &:first-child {
         border-top: none;
       }
@@ -208,7 +388,7 @@ export default {
       border-radius: 7px;
       border: 2px solid #ff1919;
       background-color: #fff;
-      transition: all .3s;
+      transition: all 0.3s;
     }
   }
   &__desc {
@@ -219,14 +399,14 @@ export default {
       font-weight: bold;
       font-size: 16px;
       line-height: 1.2;
-      transition: all .3s;
+      transition: all 0.3s;
       input {
         padding: 5px 10px;
         width: 100%;
         color: #000;
         font-size: 16px;
         border: 1px solid #ddd;
-        transition: all .3s;
+        transition: all 0.3s;
       }
     }
     &__detail {
@@ -234,14 +414,14 @@ export default {
       color: #777;
       font-size: 14px;
       line-height: 1.2;
-      transition: all .3s;
+      transition: all 0.3s;
       textarea {
         padding: 5px 10px;
         width: 100%;
         color: #000;
         font-size: 14px;
         border: 1px solid #ddd;
-        transition: all .3s;
+        transition: all 0.3s;
       }
     }
   }
@@ -257,7 +437,7 @@ export default {
       font-size: 12px;
     }
     &__edit {
-      background-color: #07C4D7;
+      background-color: #07c4d7;
     }
     &__delete {
       margin-top: 5px;

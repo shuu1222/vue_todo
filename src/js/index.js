@@ -1,4 +1,4 @@
-import Vue from 'vue';
+import Vue from 'vue';　// importing vue from node module.
 // import VueRouter from 'vue-router';
 
 // import routes from 'TodoRouterDir/routes';
@@ -9,8 +9,8 @@ import Vue from 'vue';
 
 import '../scss/global.scss';
 
-import myApp from './first';
-// import myApp from 'TodoDir';
+// import myApp from './first';
+import myApp from 'TodoDir'; // エイリアス　${src}/js/todo which is written in babel.js
 // import myApp from 'TodoRouterDir';
 // import myApp from 'TodoVuexDir';
 // import myApp from 'VuexSample';
@@ -22,10 +22,12 @@ import myApp from './first';
 // });
 
 new Vue({
-  el: '#app',
+  el: '#app', //element and template id #app this is the binding thing of html and vue
   // router,
   // store,
-  render: h => h(myApp),
+  render: h => h(myApp),  //rendering the html to the web browser.
+  // vueのコンポーネントは通常templateの中にhtml文を記述することでブラウザ上に表示させることができます。
+  //renderもtemplateと同様にhtml文をブラウザに表示させることができる関数です。　指定したコンポーネントがマウントされる。
   // render: h => h(myApp), は↓の書き方を短くしたもの
   // render: function (createElement) {
   //   return createElement(myApp)

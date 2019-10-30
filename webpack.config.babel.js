@@ -30,7 +30,7 @@ const config = {
     open: true,
     inline: true,
     hot: true,
-    port: 8080,
+    port: 8081,
     contentBase: dist,
     // historyApiFallback: true,
   },
