@@ -5,9 +5,8 @@
       <header class="header">
         <h1 class="header__title">やることリスト</h1>
       </header>
-
       <main class="main">
-<!-- 登録ボタン -->
+        <!-- 登録ボタン -->
         <form
         class="register"
         v-on:submit.prevent="targetTodo.id ? editTodo() : addTodo()"
@@ -15,9 +14,6 @@
           <!-- submit prevent で画面が更新されてしまうのを防ぎつつ、edtiTodoかaddTodoが実行される。 -->
           <div class="register__input">
             <p class="register__input__title">やることのタイトル</p>
-            <!--  v-bind:value="targetTodo.title"
-                  v-on:input="targetTodo.title = $event.target.value"
-                  「<input> や <textarea>要素の値が変更された時」 に発生します。-->
             <input
               v-model="targetTodo.title"
               type="text"
@@ -36,15 +32,19 @@
               required
             />
           </div>
-<!-- 変更の時の登録ボタン -->
+          <!-- 変更の時の登録ボタン -->
           <div class="register__submit">
-            <button class="register__submit__btn" type="submit" name="button">
+            <button
+            class="register__submit__btn"
+            type="submit"
+            name="button"
+            >
               <template v-if="targetTodo.id">
                 <span>変更する</span>
               </template>
               <template v-else>
-                <span>登録する</span>
-              </template>
+  <span>登録する</span>
+</template>
             </button>
           </div>
         </form>
@@ -52,18 +52,16 @@
       <div v-if="errorMessage" class="error">
         <p class="error__text">{{ errorMessage }}</p>
       </div>
-<!-- todoの一覧-->
+        <!-- todoの一覧-->
         <div class="todos">
           <template v-if="todos.length">
-            <!-- 0がfalseでそれ以外の数値ならtrue -->
             <ul class="todos__list">
               <li
-              v-for="todo in todos"
-              v-bind:key="todo.id"
-              v-bind:class="todo.completed ? 'is-completed' : ''"
+                v-for="todo in todos"
+                v-bind:key="todo.id"
+                v-bind:class="todo.completed ? 'is-completed' : ''"
               >
-              <!-- if todo.completed is true, add class of is-completed, if not, add empty '' to the class -->
-<!-- 未完了ボタンの処理 -->
+                <!-- 未完了ボタンの処理 -->
                 <div class="todos__inner">
                   <div class="todos__completed">
                     <button
@@ -71,27 +69,29 @@
                     type="button"
                     @click="changeCompleted(todo)"
                     >
-                    <template v-if="todo.completed">
+                      <template
+                      v-if="todo.completed"
+                      >
                         <span>完了</span>
                       </template>
                       <template v-else>
                         <span>未完了</span>
-                        </template>
+                      </template>
                     </button>
-<!-- ここまで未完了ボタン -->
+                    <!-- ここまで未完了ボタン -->
                   </div>
                   <div class="todos__desc">
                     <h2 class="todos__desc__title">{{ todo.title }}</h2>
                     <p class="todos__desc__detail">{{todo.detail}}</p>
                   </div>
-<!-- 編集ボタン　引数todoにクリックしたtodoが -->
+                  <!-- 編集ボタン　引数todoにクリックしたtodoが -->
                   <div class="todos__btn">
                     <button
-                      class="todos__btn__edit"
-                      type="button"
-                      @click="showEditor(todo)"
+                    class="todos__btn__edit"
+                    type="button"
+                    @click="showEditor(todo)"
                     >編集</button>
-<!-- 削除ボタン -->
+                    <!-- 削除ボタン -->
                     <button
                     class="todos__btn__delete"
                     type="button"
@@ -119,13 +119,13 @@
 </template>
 <script>
 import axios from "axios";
-import { log } from 'util';
+import { log } from "util";
 
 export default {
   data() {
     return {
       todos: [],
-    // ↑ここの中にデータが格納されていく。
+      // ↑ここの中にデータが格納されていく。
 
       targetTodo: {
         id: null,
@@ -136,7 +136,7 @@ export default {
       errorMessage: ""
     };
   },
-// インスタンスが生成された後に実行される
+  // インスタンスが生成された後に実行される
   created() {
     axios
       .get("http://localhost:3000/api/todos/")
@@ -144,118 +144,126 @@ export default {
         this.todos = data.todos.reverse();
         // reverseしないと古いものが上に来る
       })
-      .catch((err) => {
+      .catch(err => {
         this.showError(err);
       });
-    },
+  },
 
-//ーーーーーーーーーーーーmethodーーーーーーーーーーーーーー
-  methods: {　
-      initTargetTodo() {
-    return {
-      id: null,
-      title: '',
-      detail: '',
-      completed: false,
-    };
-  },
-    hideError(){
-    this.errorMessage = '';
-  },
-  showError(err) {
-    if (err.response) {
-      this.errorMessage = err.response.data.message;
-      
-    } else {
-      this.errorMessage = 'ネットに接続がされていない、もしくはサーバーとの接続がされていません。ご確認ください。';
-    }
-  },
-//未完了をクリックしたときの処理
+  //ーーーーーーーーーーーーmethodーーーーーーーーーーーーーー
+  methods: {
+    initTargetTodo() {
+      return {
+        id: null,
+        title: "",
+        detail: "",
+        completed: false
+      };
+    },
+    hideError() {
+      this.errorMessage = "";
+    },
+    showError(err) {
+      if (err.response) {
+        this.errorMessage = err.response.data.message;
+      } else {
+        this.errorMessage =
+          "ネットに接続がされていない、もしくはサーバーとの接続がされていません。ご確認ください。";
+      }
+    },
+    //未完了をクリックしたときの処理
     changeCompleted(todo) {
       this.targetTodo = this.initTargetTodo(); //ここでthis.targetTodoを初期化している。
       const targetTodo = Object.assign({}, todo);
-      axios.patch(`http://localhost:3000/api/todos/${targetTodo.id}`, {
-        //PATCH: リソースの部分置換
-        completed: !targetTodo.completed,
-      }).then(({ data }) => {
-        this.todos = this.todos.map((todoItem) => {
-          if (todoItem.id === targetTodo.id) return data;
-          return todoItem;
-          this.hideError();
+      axios
+        .patch(`http://localhost:3000/api/todos/${targetTodo.id}`, {
+          completed: !targetTodo.completed
+        })
+        .then(({ data }) => {
+          this.todos = this.todos.map(todoItem => {
+            if (todoItem.id === targetTodo.id) return data;
+            return todoItem;
+            this.hideError();
+          });
+        })
+        .catch(err => {
+          this.showError(err);
         });
-      }).catch((err) => {
-        // .catch(function (error) { と同じ意味
-        this.showError(err);
-        
-      });
     },
 
-// 変更のメソッド
-  showEditor(todo) {
-    this.targetTodo = Object.assign({}, todo); //showTodoはtemplate内で指定してあげた選択todoが入ってるよ
-  },
-  editTodo() {
-    const targetTodo = this.todos.find(todo => todo.id === this.targetTodo.id);//選択したデータのI'dとデータないのI'dが同じものを引っ張って来て定義する。
-    if (
-      targetTodo.title === this.targetTodo.title && targetTodo.detail === this.targetTodo.detail　//タイトルと内容両方に変更がない場合
-    ) {
-      this.targetTodo = this.initTargetTodo(); //空のやつをtargetTodoに代入してるよ。
-      return;　//変更する必要がないので、フォーム内を初期化して処理を止める。
-    }
-    axios.patch(`http://localhost:3000/api/todos/${this.targetTodo.id}`, {
-        //PATCH: リソースの部分置換
-      title: this.targetTodo.title,
-      detail: this.targetTodo.detail,　//変更後のタイトルとdetail
-    }).then(({ data }) => {
-      this.todos = this.todos.map((todo) => {   //map 与えられた関数を配列のすべての要素に対して呼び出し、その結果からなる新しい配列を生成します。
-        if (todo.id === this.targetTodo.id) return data;　//もしtodo.id=taget idだったら　dataを返しますよ
-        return todo;  //returnは１度通るとその後通らないのでここはelseの処理
-      });
-      this.targetTodo = this.initTargetTodo();　//初期化
-      this.hideError();
-    }).catch((err) => {
-        this.showError(err);
-    });
-  },
-// 削除のメソッド
-　   deleteTodo(id) {
-    this.targetTodo = this.initTargetTodo();
-    //console.log(id);　//ここで引数にIdを渡してindex番号を確認
-      axios.delete(`http://localhost:3000/api/todos/${id}`)
-      .then(({ data }) => {
-    this.todos = data.todos.reverse();
-        this.hideError();
-  }).catch((err) => {
-  this.showError(err);
-  });
-  },
-//Todoを追加する処理
+    // 変更のメソッド
+    showEditor(todo) {
+      this.targetTodo = Object.assign({}, todo); //showTodoはtemplate内で指定してあげた選択todoが入ってるよ
+    },
+    editTodo() {
+      const targetTodo = this.todos.find(
+        todo => todo.id === this.targetTodo.id
+      ); //選択したデータのI'dとデータないのI'dが同じものを引っ張って来て定義する。
+      if (
+        targetTodo.title === this.targetTodo.title &&
+        targetTodo.detail === this.targetTodo.detail //タイトルと内容両方に変更がない場合
+      ) {
+        this.targetTodo = this.initTargetTodo(); //空のやつをtargetTodoに代入してるよ。
+        return; //変更する必要がないので、フォーム内を初期化して処理を止める。
+      }
+      axios
+        .patch(`http://localhost:3000/api/todos/${this.targetTodo.id}`, {
+          //PATCH: リソースの部分置換
+          title: this.targetTodo.title,
+          detail: this.targetTodo.detail //変更後のタイトルとdetail
+        })
+        .then(({ data }) => {
+          this.todos = this.todos.map(todo => {
+            //map 与えられた関数を配列のすべての要素に対して呼び出し、その結果からなる新しい配列を生成します。
+            if (todo.id === this.targetTodo.id) return data; //もしtodo.id=taget idだったら　dataを返しますよ
+            return todo; //returnは１度通るとその後通らないのでここはelseの処理
+          });
+          this.targetTodo = this.initTargetTodo(); //初期化
+          this.hideError();
+        })
+        .catch(err => {
+          this.showError(err);
+        });
+    },
+    // 削除のメソッド
+    deleteTodo(id) {
+      this.targetTodo = this.initTargetTodo();
+      axios
+        .delete(`http://localhost:3000/api/todos/${id}`)
+        .then(({ data }) => {
+          this.todos = data.todos.reverse();
+          this.hideError();
+        })
+        .catch(err => {
+          this.showError(err);
+        });
+    },
+    //Todoを追加する処理
     addTodo() {
       const postTodo = Object.assign(
         {},
         {
           title: this.targetTodo.title,
           detail: this.targetTodo.detail
-        });
-        // {title: "タイトルの中身", detail: "やることの中身"}っていうオブジェクトがpostTodoに追加される
-
+        }
+      );
       axios
-        .post("http://localhost:3000/api/todos/", postTodo)　//引数で送るデータの指定をしている。　今回は上で定義したpostTodo
-        // 上でデータを追加してあげて、成功したら下の処理をする。
-        .then(({ data }) => { //リクエストの返答が引数に入っている
+        .post("http://localhost:3000/api/todos/", postTodo)
+        .then(({ data }) => {
           this.todos.unshift(data);  // unshift() メソッドは、配列の最初に 1 つ以上の要素を追加し、新しい配列の長さを返します。
-          this.targetTodo = Object.assign({}, this.targetTodo, {title: "",detail: ""}); //text formの中身を空にする
-          this.errorMessage="";　//エラーメッセージを空にする
-        }).catch(err => {　// エラー時の処理
-        this.showError(err);
+          this.targetTodo = Object.assign({}, this.targetTodo, {
+            title: "",
+            detail: ""
+          });
+          this.hideError();
+        })
+        .catch(err => {
+          this.showError(err);
         });
-    },
+    }
   }
 };
 </script>
 
-
-<!-- ~~~~~~~~~~~~style~~~~~~~~~~~~ !-->
 <style lang="scss" scoped>
 .todo {
   &__wrapper {
