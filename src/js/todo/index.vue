@@ -45,9 +45,9 @@
           </div>
         </form>
 
-      <div v-if="errorMessage" class="error">
-        <p class="error__text">{{ errorMessage }}</p>
-      </div>
+        <div v-if="errorMessage" class="error">
+          <p class="error__text">{{ errorMessage }}</p>
+        </div>
         <!-- todoの一覧-->
         <div class="todos">
           <template v-if="todos.length">
@@ -103,18 +103,17 @@
           </template>
         </div>
       </main>
-    <footer class="footer">
-      <p>全項目数: {{ todos.length }}</p>
-      <p>完了済: {{ todos.filter(todo => todo.completed).length }}</p>
-      <p>未完了: {{ todos.filter(todo => !todo.completed).length }}</p>
-    </footer>
+      <footer class="footer">
+        <p>全項目数: {{ todos.length }}</p>
+        <p>完了済: {{ todos.filter(todo => todo.completed).length }}</p>
+        <p>未完了: {{ todos.filter(todo => !todo.completed).length }}</p>
+      </footer>
     </div>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { log } from "util";
 
 export default {
   data() {
@@ -139,6 +138,7 @@ export default {
         this.showError(err);
       });
   },
+
 
   //ーーーーーーーーーーーーmethodーーーーーーーーーーーーーー
   methods: {
@@ -185,9 +185,8 @@ export default {
     showEditor(todo) {
       this.targetTodo = Object.assign({}, todo); //showTodoはtemplate内で指定してあげた選択todoが入ってるよ
     },
-    editTodo() {
-      const targetTodo = this.todos
-      .find(todo => todo.id === this.targetTodo.id); //選択したデータのI'dとデータないのI'dが同じものを引っ張って来ます
+    editTodo() {  //次回ここから説明。
+      const targetTodo = this.todos.find(todo => todo.id === this.targetTodo.id);
       if (
         targetTodo.title === this.targetTodo.title &&
         targetTodo.detail === this.targetTodo.detail //タイトルと内容両方に変更がない場合
@@ -196,13 +195,13 @@ export default {
         return; //変更する必要がないので、フォーム内を初期化して処理を止める。
       }
       axios
-        .patch(`http://localhost:3000/api/todos/${this.targetTodo.id}`, {
+        .patch(`http://localhost:3000/api/todos/${this.targetTodo.id}`, {　//back quoteは${} を文字列内で展開する　シングルクオートだと＋で足してあげないといけない。
           //PATCH: リソースの部分置換
           title: this.targetTodo.title,
           detail: this.targetTodo.detail //変更後のタイトルとdetail
         })
-        .then(({ data }) => {
-          this.todos = this.todos.map(todo => {
+        .then(( {data} ) => {　
+          this.todos = this.todos.map(todo => {　//どういう要素で配列を作るか？　新しい配列の中身はどういうものになるか。
             //map 与えられた関数を配列のすべての要素に対して呼び出し、その結果からなる新しい配列を生成します。
             if (todo.id === this.targetTodo.id) return data;  //もしtodo.id=taget idだったら　dataを返しますよ
             return todo;  //returnは１度通るとその後通らないのでここはelseの処理
@@ -240,12 +239,12 @@ export default {
         .post("http://localhost:3000/api/todos/", postTodo)
         .then(({ data }) => {
           this.todos.unshift(data);  // unshift() メソッドは、配列の最初に 1 つ以上の要素を追加し、新しい配列の長さを返します。
-          this.targetTodo = this.initTargetTodo();
+          this.targetTodo = this.initTargetTodo(); //オブジェクトで返しているので実行結果がオブジェクトになる。　それを入れてる。
           this.hideError();
         })
         .catch(err => {
           this.showError(err);
-        });　
+        });
     }
   }
 };
