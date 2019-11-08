@@ -52,7 +52,7 @@ const store = new Vuex.Store({
     showError(state, payload) {
       if (payload) {
         const errorMessage = payload.data;
-        state.errorMessage = errorMessage;// ここでエラーメッセージを表示させます。
+        state.errorMessage = errorMessage;// 追加したコード、ここでエラーメッセージを表示させます。
       } else {
         state.errorMessage = 'ネットに接続がされていない、もしくはサーバーとの接続がされていません。ご確認ください。';
       }
@@ -149,15 +149,14 @@ const store = new Vuex.Store({
       commit('initTargetTodo');
     },
     deleteTodo({ commit }, todoId) {
-      // console.log(todo.id);
       commit('initTargetTodo');
-      axios.delete(`http://localhost:3000/api/todos/${todoId}`).then(({ data }) => {
-        commit('deleteTodo', data.todos);
-        // console.log(data);
-      }).catch((err) => {
-        commit('showError', err.response);
-        commit('initTargetTodo');
-      });
+      axios.delete(`http://localhost:3000/api/todos/${todoId}`)
+        .then(({ data }) => {
+          commit('deleteTodo', data.todos);
+          commit('initTargetTodo');
+        }).catch((err) => {
+          commit('showError', err.response);
+        });
       // 必要があれば処理
     },
   },

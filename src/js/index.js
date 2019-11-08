@@ -26,7 +26,7 @@ const router = new VueRouter({
 new Vue({
   el: '#app', // element and template id #app this is the binding thing of html and vue
   router,
-  store,
+  store, // ここでstoreを指定してあげることでコンポーネント内で使えるようになる。
   render: h => h(myApp), // rendering the html to the web browser.
   // vueのコンポーネントは通常templateの中にhtml文を記述することでブラウザ上に表示させることができます。
   // render: h => h(myApp), は↓の書き方を短くしたもの

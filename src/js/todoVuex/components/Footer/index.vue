@@ -9,9 +9,15 @@
 <script>
 export default {
   computed: {
-    todos: () => this.$store.state.todos,
-    incompleteTodosLength: () => this.$store.getters.incompleteTodosLength,
-    completedTodosLength: () => this.$store.getters.completedTodosLength,
+    todos() {
+      return this.$store.state.todos;
+    },
+    incompleteTodosLength() {
+      return this.$store.getters.incompleteTodosLength;
+    },
+    completedTodosLength() {
+      return this.$store.getters.completedTodosLength;
+    },
   },
 };
 </script>
