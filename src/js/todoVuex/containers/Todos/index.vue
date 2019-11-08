@@ -22,7 +22,7 @@ import { ErrorMessage, EmptyMessage } from 'TodoVuexDir/components/Message';
 import Register from 'TodoVuexDir/components/Register';
 import List from 'TodoVuexDir/components/List';
 import Navi from 'TodoVuexDir/components/Navi';
-// import { log } from 'util';
+import { log } from 'util';
 
 
 export default {
@@ -35,14 +35,19 @@ export default {
     appNavi: Navi,
   },
   computed: {
-    todoFilter: () => this.$store.state.todoFilter,
-    todos: () => {
+        todoFilter: function() {
+      return this.$store.state.todoFilter;
+    },
+    todos: function() {
+
       if (this.todoFilter === 'allTodos') {
         return this.$store.state.todos;
       }
       return this.$store.getters[this.todoFilter];
     },
-    errorMessage: () => this.$store.state.errorMessage,
+    errorMessage: function() {
+      return this.$store.state.errorMessage;
+    },
     emptyMessage: () => this.$store.state.emptyMessage,
   },
   watch: {
@@ -53,7 +58,7 @@ export default {
       this.$store.dispatch('setTodoFilter', to.name);
     },
   },
-  created: () => {
+  created: function() {
     this.$store.dispatch('getTodos');
     this.$store.dispatch('setTodoFilter', this.$route.name);
   },
