@@ -5,9 +5,7 @@
 <script>
 export default {
   computed: {
-    emptyMessage: function() {
-      return this.$store.state.emptyMessage;
-    },
+    emptyMessage: () => this.$store.state.emptyMessage,
   },
 };
 </script>

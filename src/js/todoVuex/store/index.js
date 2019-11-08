@@ -15,12 +15,12 @@ const store = new Vuex.Store({
       detail: '',
       completed: '',
     },
-    errorMessage: 'エラーが起きました。',
-    emptyMessage: 'やることリストは空です。',
+    errorMessage: '',
+    emptyMessage: '',
   },
   getters: {
-    completedTodos: (state) => state.todos.filter((todo) => todo.completed),
-    incompleteTodos: (state) => state.todos.filter((todo) => !todo.completed),
+    completedTodos: state => state.todos.filter(todo => todo.completed),
+    incompleteTodos: state => state.todos.filter(todo => !todo.completed),
     completedTodosLength: (state, getters) => getters.completedTodos.length,
     incompleteTodosLength: (state, getters) => getters.incompleteTodos.length,
   },
@@ -30,11 +30,11 @@ const store = new Vuex.Store({
     },
     setEmptyMessage(state, routeName) {
       if (routeName === 'completedTodos') {
-        let emptyMessage = '完了済みのやることリストはありません。';
+        state.emptyMessage = '完了済みのやることリストはありません。';
       } else if (routeName === 'incompleteTodos') {
-        let emptyMessage = '未完了のやることリストはありません。';
+        state.emptyMessage = '未完了のやることリストはありません。';
       } else {
-        let emptyMessage = 'やることリストには何も登録されていません。';
+        state.emptyMessage = 'やることリストには何も登録されていません。';
       }
     },
     initTargetTodo(state) {
@@ -44,13 +44,15 @@ const store = new Vuex.Store({
         detail: '',
         completed: false,
       };
+      state.errorMessage = '';
     },
     hideError(state) {
-      state.errorMessage = 'エラーが起きました。';
+      state.errorMessage = '';
     },
     showError(state, payload) {
       if (payload) {
         const errorMessage = payload.data;
+        state.errorMessage = errorMessage;// ここでエラーメッセージを表示させます。
       } else {
         state.errorMessage = 'ネットに接続がされていない、もしくはサーバーとの接続がされていません。ご確認ください。';
       }
@@ -63,6 +65,9 @@ const store = new Vuex.Store({
     },
     addTodo(state, payload) {
       state.todos.unshift(payload);
+    },
+    deleteTodo(state, payload) {
+      state.todos = payload.reverse();
     },
     showEditor(state, payload) {
       state.targetTodo = Object.assign({}, payload);
@@ -144,10 +149,14 @@ const store = new Vuex.Store({
       commit('initTargetTodo');
     },
     deleteTodo({ commit }, todoId) {
+      // console.log(todo.id);
+      commit('initTargetTodo');
       axios.delete(`http://localhost:3000/api/todos/${todoId}`).then(({ data }) => {
-        // 処理
+        commit('deleteTodo', data.todos);
+        // console.log(data);
       }).catch((err) => {
-        // 処理
+        commit('showError', err.response);
+        commit('initTargetTodo');
       });
       // 必要があれば処理
     },

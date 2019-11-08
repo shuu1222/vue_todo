@@ -21,7 +21,7 @@ const config = {
       TodoRouterDir: `${src}/js/todoRouter`,
       TodoVuexDir: `${src}/js/todoVuex`,
       VuexSample: `${src}/js/todoVuex_sample`,
-    }
+    },
   },
   plugins: [
     new VueLoaderPlugin()
@@ -30,9 +30,9 @@ const config = {
     open: true,
     inline: true,
     hot: true,
-    port: 8081,
+    port: 8080,
     contentBase: dist,
-    // historyApiFallback: true,
+    historyApiFallback: true,
   },
   entry: {
     index: `${src}/js/index.js`
@@ -43,13 +43,13 @@ const config = {
   },
   module: {
     rules: [
-      // {
-      //   test: /\.(jsx?|vue)$/,
-      //   enforce: 'pre',
-      //   exclude: /node_modules/,
-      //   loader: 'eslint-loader',
-      //   options: { failOnError: false }
-      // },
+      {
+        test: /\.(jsx?|vue)$/,
+        enforce: 'pre',
+        exclude: /node_modules/,
+        loader: 'eslint-loader',
+        options: { failOnError: false }
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,

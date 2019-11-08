@@ -21,7 +21,7 @@ export default {
     appListItem: ListItem,
   },
   props: {
-    todos: {
+    todos: { //containerからfilteredTodoをtodosという名前で渡されている。
       type: Array,
       default: () => [],
     },

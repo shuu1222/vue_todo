@@ -31,7 +31,8 @@
         name="addButton"
         @click="(todoId === null) ? $emit('addTodo') : $emit('editTodo')"
       >
-        <template v-if="todoId === null">
+      <!-- 下のtodoIdは親のtargetTodo.id -->
+        <template v-if="todoId === null">　
           <span>登録する</span>
         </template>
         <template v-else>

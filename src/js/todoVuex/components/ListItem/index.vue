@@ -31,6 +31,7 @@
         <button
           class="todo__item__btn__delete"
           type="button"
+          @click="deleteTodo(todo)"
         >
           削除
         </button>
@@ -44,17 +45,18 @@ export default {
   props: {
     todo: {
       type: Object,
-      default: function() {
-        return {};
-      },
+      default: () => {},
     },
   },
   methods: {
-    changeCompleted: function(todo) {
+    changeCompleted: (todo) => {
       this.$store.dispatch('changeCompleted', todo);
     },
-    showEditor: function(todo) {
+    showEditor: (todo) => {
       this.$store.dispatch('showEditor', todo);
+    },
+    deleteTodo: (todo) => {
+      this.$store.dispatch('deleteTodo', todo.id);
     },
   },
 };
