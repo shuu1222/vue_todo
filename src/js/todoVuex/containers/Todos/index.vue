@@ -4,7 +4,7 @@
     <app-register
     v-if="todoFilter !== 'completedTodos'" />
     <app-error-message
-    v-if="errorMessage"　/>
+    v-if="errorMessage"/>
     <template v-slot:todos>
     <app-list
       v-if="todos.length"
